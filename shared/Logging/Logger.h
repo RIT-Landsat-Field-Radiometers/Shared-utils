@@ -193,21 +193,6 @@ private:
 };
 
 Logger Log("app");
-Logger cologger("CANOpen");
-
-extern "C" void coLogDebug(const char *fmt)
-{
-	cologger.debug(fmt);
-}
-
-extern "C" void coLogDebugF(const char *fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-	cologger.debug(fmt, args);
-	va_end(args);
-
-}
 
 inline Logger::Logger(const char *name) :
 		name_(name)
