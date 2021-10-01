@@ -192,8 +192,6 @@ private:
 	void log(LogLevel level, const char *fmt, va_list args) const;
 };
 
-Logger Log("app");
-
 inline Logger::Logger(const char *name) :
 		name_(name)
 {
