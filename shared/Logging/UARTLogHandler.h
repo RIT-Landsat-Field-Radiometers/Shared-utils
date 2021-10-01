@@ -9,7 +9,7 @@
 #define SRC_SHARED_LOGGING_UARTLOGHANDLER_H_
 
 #include "Logger.h"
-#include "../UARTManager.h"
+#include "bsp/UART/UARTManager.h"
 
 class UARTLogHandler
 {
