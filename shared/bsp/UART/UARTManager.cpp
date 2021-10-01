@@ -87,25 +87,25 @@ void UARTManager::start()
 			&ProcessUART_attributes);
 }
 
-//void UARTManager::print(const char *fmt, ...)
-//{
-//	va_list args;
-//	va_start(args, fmt);
-//	char *buffer = (char *) pvPortMalloc(vsnprintf(nullptr, 0, fmt, args) + 1);
-//	va_end (args);
-//	va_start(args, fmt);
-//	vsprintf(buffer, fmt, args);
-//	va_end (args);
-//
-//	osMessageQueuePut(UARTOutboxHandle, &buffer, 0, 0);
-//}
+void UARTManager::print(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	char *buffer = (char *) pvPortMalloc(vsnprintf(nullptr, 0, fmt, args) + 1);
+	va_end (args);
+	va_start(args, fmt);
+	vsprintf(buffer, fmt, args);
+	va_end (args);
 
-//void UARTManager::vprint(const char *format, va_list arg)
-//{
-//	char *buffer = (char *) pvPortMalloc(vsnprintf(nullptr, 0, format, arg) + 1);
-//	vsprintf(buffer, format, arg);
-//	osMessageQueuePut(UARTOutboxHandle, &buffer, 0, 0);
-//}
+	osMessageQueuePut(UARTOutboxHandle, &buffer, 0, 0);
+}
+
+void UARTManager::vprint(const char *format, va_list arg)
+{
+	char *buffer = (char *) pvPortMalloc(vsnprintf(nullptr, 0, format, arg) + 1);
+	vsprintf(buffer, format, arg);
+	osMessageQueuePut(UARTOutboxHandle, &buffer, 0, 0);
+}
 
 UARTManager::~UARTManager()
 {
