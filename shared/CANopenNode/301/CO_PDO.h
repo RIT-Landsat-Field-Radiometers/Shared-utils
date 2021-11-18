@@ -152,7 +152,7 @@ extern "C" {
  * identifiers. In that case RPDO5 has CAN_ID=0x200+NodeId+1, RPDO6 has
  * CAN_ID=0x300+NodeId+1, RPDO9 has CAN_ID=0x200+NodeId+2 and so on. */
 #ifndef CO_RPDO_DEFAULT_CANID_COUNT
-#define CO_RPDO_DEFAULT_CANID_COUNT 4
+#define CO_RPDO_DEFAULT_CANID_COUNT 0
 #endif
 
 /** Number of CANopen TPDO objects, which uses default CAN indentifiers.

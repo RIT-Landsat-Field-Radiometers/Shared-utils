@@ -45,7 +45,10 @@ private:
 		return s1;
 	}
 
-	explicit UARTLogHandler(){};
+	explicit UARTLogHandler()
+	{
+	}
+	;
 
 	static inline UARTLogHandler* getInstance()
 	{
@@ -128,6 +131,11 @@ public:
 		return _level;
 	}
 
+	void setLevel(LogLevel level)
+	{
+		_level = level;
+	}
+
 	// These methods are called by the LogManager
 	void message(const char *msg, LogLevel level, const char *category,
 			const LogAttributes &attr)
@@ -156,35 +164,35 @@ protected:
 			const LogAttributes &attr)
 	{
 		const char *s = nullptr;
+
+		char buf[1024];
+		size_t idx = 0;
 		// Timestamp
 		if (attr.has_time)
 		{
-			printf("%010u ", (unsigned) attr.time);
+			idx += sprintf(buf + idx, "%010u ", (unsigned) attr.time);
 		}
 		// Category
 		if (category)
 		{
-			write('[');
-			write(category);
-			write("] ", 2);
+			idx += sprintf(buf + idx, "[%s] ", category);
 		}
 		// Source file
 		if (attr.has_file)
 		{
 			s = extractFileName(attr.file); // Strip directory path
-			write(s); // File name
+			idx += sprintf(buf + idx, "%s", s); // File name
 			if (attr.has_line)
 			{
-				write(':');
-				printf("%d", (int) attr.line); // Line number
+				idx += sprintf(buf + idx, ":%d", (int) attr.line); // Line number
 			}
 			if (attr.has_function)
 			{
-				write(", ", 2);
+				idx += sprintf(buf + idx, ", ");
 			}
 			else
 			{
-				write(": ", 2);
+				idx += sprintf(buf + idx, ": ");
 			}
 		}
 		// Function name
@@ -192,41 +200,40 @@ protected:
 		{
 			size_t n = 0;
 			s = extractFuncName(attr.function, &n); // Strip argument and return types
-			write(s, n);
-			write("(): ", 4);
+			idx += sprintf(buf + idx, "%.*s(): ", (int) n, s);
 		}
 		// Level
 		s = levelName(level);
-		write(s);
-		write(": ", 2);
+		idx += sprintf(buf + idx, "%s: ", s);
 		// Message
 		if (msg)
 		{
-			write(msg);
+			idx += sprintf(buf + idx, "%s", msg);
 		}
 		// Additional attributes
 		if (attr.has_code || attr.has_details)
 		{
-			write(" [", 2);
+			idx += sprintf(buf + idx, " [");
 			// Code
 			if (attr.has_code)
 			{
-				write("code = ", 7);
-				printf("%" PRIiPTR, (intptr_t) attr.code);
+				idx += sprintf(buf + idx, "code = %" PRIiPTR,
+						(intptr_t) attr.code);
 			}
 			// Details
 			if (attr.has_details)
 			{
 				if (attr.has_code)
 				{
-					write(", ", 2);
+					idx += sprintf(buf + idx, ", ");
 				}
-				write("details = ", 10);
-				write(attr.details);
+				idx += sprintf(buf + idx, "details = %s", attr.details);
 			}
-			write(']');
+			idx += sprintf(buf + idx, "]");
 		}
-		write("\r\n", 2);
+		idx += sprintf(buf + idx, "\r\n");
+		write(buf, idx);
+
 	}
 
 	/*!
@@ -238,10 +245,26 @@ protected:
 	 */
 	inline void write(const char *data, size_t size)
 	{
+		static osMutexId_t logMutex = nullptr;
+
+		if(logMutex == nullptr)
+		{
+			logMutex = osMutexNew(nullptr);
+		}
+
+		auto res = osMutexAcquire(logMutex, 10);
+
+		if(res != osOK)
+		{
+			return;
+		}
+
 		char buf[size + 1];
 		memcpy(buf, data, size);
 		buf[size] = '\0';
 		uart->print(buf);
+
+		osMutexRelease(logMutex);
 	}
 	/*!
 	 \brief Writes string to output stream.
@@ -268,7 +291,7 @@ protected:
 	 This method is equivalent to `stream()->printf(fmt, ...)`.
 	 */
 	inline void printf(const char *fmt, ...)
-			__attribute__((format(printf, 2, 3)))
+	__attribute__((format(printf, 2, 3)))
 	{
 		va_list args;
 		va_start(args, fmt);

@@ -32,7 +32,7 @@
 #define OD_GET(entry, index) co->config->ENTRY_##entry
 
 #else
-#include "OD.h"
+#include "CANOpenNode/OD.h"
 #define CO_GET_CO(obj) CO_##obj
 #define CO_GET_CNT(obj) OD_CNT_##obj
 #define OD_GET(entry, index) OD_ENTRY_##entry

@@ -28,8 +28,8 @@
 
 #include <string.h>
 
-#include "CO_config.h"
-#include "../../bsp/CANOpenNode/stm32/CO_driver_stm32.h"
+#include "CANOpenNode/CO_config.h"
+#include "bsp/CANOpenNode/CO_driver_stm32.h"
 
 #ifdef __cplusplus
 extern "C" {
