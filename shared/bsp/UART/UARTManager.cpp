@@ -7,10 +7,11 @@
 
 #include "UARTManager.h"
 
-#include <cstdio>
 #include <string.h>
-#include <stdio.h>
 #include <cstdarg>
+
+#include "Logging/printf.h"
+
 
 typedef struct
 {
@@ -21,6 +22,7 @@ typedef struct
 static UARTManager *manager = nullptr;
 static char *msgToFree = nullptr;
 static int msgSize = 0;
+
 
 UARTManager::UARTManager(UART_HandleTypeDef *uart)
 {
@@ -97,10 +99,11 @@ void UARTManager::print(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	char *buffer = (char*) pvPortMalloc(vsnprintf(nullptr, 0, fmt, args) + 1);
+	size_t strsize = vsnprintf(nullptr, 0, fmt, args) + 1;
+	char *buffer = (char*) pvPortMalloc(strsize);
 	va_end(args);
 	va_start(args, fmt);
-	vsprintf(buffer, fmt, args);
+	vsnprintf(buffer, strsize, fmt, args);
 	va_end(args);
 
 	if (osMessageQueuePut(UARTOutboxHandle, &buffer, 0, 0) != osOK)
@@ -111,8 +114,9 @@ void UARTManager::print(const char *fmt, ...)
 
 void UARTManager::vprint(const char *format, va_list arg)
 {
-	char *buffer = (char*) pvPortMalloc(vsnprintf(nullptr, 0, format, arg) + 1);
-	vsprintf(buffer, format, arg);
+	size_t strsize = vsnprintf(nullptr, 0, format, arg) + 1;
+	char *buffer = (char*) pvPortMalloc(strsize);
+	vsnprintf(buffer, strsize,format, arg);
 
 	if (osMessageQueuePut(UARTOutboxHandle, &buffer, 0, 0) != osOK)
 	{

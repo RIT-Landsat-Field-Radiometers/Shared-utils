@@ -20,7 +20,10 @@
 #include "main.h"
 
 #include <algorithm>
-#include <cstdio>
+//#include <cstdio>
+
+#include "Logging/printf.h"
+
 
 #define STATIC_ASSERT_FIELD_SIZE(struct, field, size) \
         STATIC_ASSERT(field_size_changed_##struct##_##field, sizeof(struct::field) == size);
@@ -69,6 +72,8 @@ void log_message_v(int level, const char *category, LogAttributes *attr,
 	if (msg_callback)
 	{
 		const int n = vsnprintf(buf, sizeof(buf), fmt, args);
+
+
 		if (n > (int) sizeof(buf) - 1)
 		{
 			buf[sizeof(buf) - 2] = '~';
@@ -110,6 +115,7 @@ void log_printf_v(int level, const char *category, void *reserved,
 	}
 	char buf[LOG_MAX_STRING_LENGTH];
 	int n = vsnprintf(buf, sizeof(buf), fmt, args);
+
 	if (n > (int) sizeof(buf) - 1)
 	{
 		buf[sizeof(buf) - 2] = '~';
